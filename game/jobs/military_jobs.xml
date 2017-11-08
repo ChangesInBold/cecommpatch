@@ -1,0 +1,641 @@
+<jobsDB>
+<military>
+<!--
+	<job name="Occupy Bunker" display_name="Occupy Bunker"
+		mandatory_eval="1"
+		icon_skin="ui\orderIcons.xml" icon="cycle_image"
+		interruptee_type="2" interrupter_type="1"
+		is_social="1"
+		can_be_social="0"
+		filter="military" >
+	
+		<require_character_on_shift/>
+		<require_not_sitting/>
+		<require_building_module input="bunker" tag="bunker" not_tag="occupied"/>
+		<utility>
+			<base_job_utility weight="2500"/>
+			<distance_from input="bunker" weight="-1" />
+		</utility>
+		<fsm>
+			<walk_to_module input="bunker"/>
+		</fsm>
+	</job> -->
+
+	<job name="Stand at Attention" display_name="Stand at Attention"
+		mandatory_eval="1"
+		icon_skin="ui\orderIcons.xml" icon="idle_icon"
+		interruptee_type="1" interrupter_type="0"
+		is_social="1"
+		can_be_social="0"
+		filter="military" >
+		
+		<require_character_on_shift/>
+		<require_gameobject input="superior"
+						tag="military,middle_class"
+						range="4"
+						must_lock="0"
+						failure_reason="Requires superior."
+						do_not_fill_dependency="1"/>
+
+		<utility min="0" max="30">
+			<base_job_utility weight="5"/>
+		</utility>
+		<fsm>
+			<walk_to_near_position input="superior"/>
+			<animate_at input="superior" name="stand_transition_to_attention" />
+			<animate name="attention_idle" />
+			<animate name="attention_transition_to_standing" />
+			<military_inspire />
+		</fsm>
+	</job>
+		
+	<job name="Patrol (Military)" display_name="Patrol (Military)"
+		mandatory_eval="1"
+		icon_skin="ui\orderIcons.xml" icon="cycle_image"
+		interruptee_type="2" interrupter_type="1"
+		is_social="1"
+		can_be_social="0"
+		filter="military" >
+		
+		<require_character_on_shift/>
+		<require_not_sitting/>
+		<require_random_location range="8" input="destination"/>
+		
+		<utility min="0" max="30">
+			<base_job_utility weight="15"/>
+		</utility>
+		<fsm>
+			<walk_to input="destination"/>
+			<military_inspire />
+		</fsm>
+	</job>
+
+	<job name="Cull Troublesome Animal (military)"
+			display_name="Cull Troublesome Animal"
+			mandatory_eval="1"
+			test_for_interrupts="1"
+			icon_skin="ui\orderIcons.xml" icon="hunting"
+			interruptee_type="4"
+			interrupter_type="3"
+			filter="workshop">
+
+			<require_not_sitting/>
+			<require_empty_hands/>
+			<require_character_on_shift/>
+			<require_gameobject input="animal"
+							tag="bad_animal"
+							not_tag="dead"
+							closest="1"
+							range="20"
+							must_lock="0"
+							failure_reason="Attacking requires a target huntable."/>
+			 
+			<utility >
+				<base_job_utility weight="1000"/>
+			</utility>
+			<fsm>
+				<attack_ranged input="animal" name="run"/>
+				<create_job input="animal" name="Butcher Animal Corpse (spontaneous)" />
+			</fsm>
+	</job>
+
+	<job name="Execute Frontier Justice (military)" display_name="Frontier Justice!"
+		can_interrupt="1" mandatory_eval="1"
+		interruptee_type="4" interrupter_type="3"
+		icon_skin="ui\orderIcons.xml" icon="guns_image"
+		can_be_social="0"
+		filter="military" >
+		
+		<require_not_sitting/>
+		<require_character_has_no_tag tag="frontier_justice"/>
+		<require_gameobject input="enemy"
+						tag="frontier_justice"
+						not_tag="corpse"
+						range="30"
+						must_lock="0"
+						failure_reason="Attacking requires a target of frontier justice."/>
+		
+		<utility>
+			<base_job_utility weight="2000"/>
+			<distance_from input="enemy" weight="-1" />
+		</utility>
+		<fsm>
+			<set_tag name="executing_justice" />
+			<attack_ranged input="enemy" name="run"/>
+			<remove_tag name="executing_justice" />
+		</fsm>
+	</job>
+	
+	<job name="Execute Melee Frontier Justice (military)" display_name="Frontier Justice!"
+		mandatory_eval="1" can_interrupt="1"
+		interruptee_type="4" interrupter_type="3"
+		icon_skin="ui\orderIcons.xml" icon="guns_image"
+		can_be_social="0"
+		filter="military" >
+
+		<require_not_sitting/>
+		<require_gameobject input="enemy" tag="frontier_justice" not_tag="corpse" range="25" must_lock="0"
+						failure_reason="Attacking requires a target of frontier justice." closest="1"/>
+		
+		<utility>
+			<base_job_utility weight="1900"/>
+		</utility>
+		<fsm>
+			<set_tag name="executing_justice" />
+			<attack_melee input="enemy" name="run"/>
+			<remove_tag name="executing_justice" />
+		</fsm>
+	</job>
+		
+	<job name="Distribute Beatings (justice)" display_name="Distribute Beatings"
+		mandatory_eval="1" can_interrupt="1"
+		icon_skin="ui\orderIcons.xml" icon="guns_image"
+		interruptee_type="2" interrupter_type="1"
+		can_be_social="0"
+		filter="military" >
+
+		<require_not_sitting/>
+		<require_character_has_no_tag tag="frontier_justice"/>
+		<require_gameobject input="enemy" range="20" must_lock="0" closest="1"
+						tag="marked_for_beating"
+						not_tag="corpse"
+						failure_reason="Attacking requires a target of frontier justice."/>
+		
+		<utility min="0" max="799">
+			<base_job_utility weight="750"/>
+		</utility>
+		<fsm>
+			<set_tag name="executing_justice" />
+			<attack_melee input="enemy" name="run"/>
+			<remove_tag name="executing_justice" />
+		</fsm>
+	</job>
+
+		<!--<job name="Destroy Cult Shrine" display_name="Destroy Cult Shrine"
+			mandatory_eval="1" loop="0"
+			interruptee_type="3" interrupter_type="2"
+			icon_skin="ui\thoughtIcons.xml" icon="cultist_shrine"
+			can_be_social="0"
+			filter="military" >
+
+			<require_not_sitting/>
+			<require_not_attending_party/>
+			<require_wield_tool tag="weapon" failure_reason="Requires available weapon."/>
+			<require_session_bool name="persecuteCultShrines" value="1" />
+			
+			<require_gameobject input="shrine"
+							range="20"
+							tag="cultist_shrine"
+							must_lock="0"
+							failure_reason="Requires cultist shrine."
+							do_not_fill_dependency="1" />
+			
+			<on_abort behaviour="yield"/>
+			<utility>
+				<base_job_utility weight="300"/>
+			</utility>
+			<fsm>
+				<walk_to_adjacent_position input="shrine" />
+				<attack_object input="shrine" />
+			</fsm>
+			<history importance="10" />
+		</job>-->
+
+		<job name="Shoot At Entity (spontaneous target)" display_name="Shoot At Entity"
+				can_interrupt="1" mandatory_eval="1"
+				interruptee_type="4" interrupter_type="3"
+				icon_skin="ui\orderIcons.xml" icon="guns_image"
+				can_be_social="0"
+				filter="military" >
+
+			<require_not_sitting/>>
+			<require_gameobject input="enemy"
+							tag="hostile_agent"
+							range="16"
+							must_lock="0"
+							failure_reason="Attacking requires a target hostile."
+							closest="1"
+							do_not_fill_dependency="1"/>
+			
+			<utility>
+				<base_job_utility weight="-1"/>
+			</utility>
+			<fsm>
+				<attack_ranged input="enemy" name="run"/>
+			</fsm>
+		</job>
+
+		<job name="Melee Attack Entity (spontaneous target)" display_name="Melee Attack Entity"
+				mandatory_eval="0"
+				can_interrupt="1"
+				can_be_social="0"
+				interruptee_type="4" interrupter_type="3"
+				icon_skin="ui\orderIcons.xml" icon="guns_image"
+				filter="military" >
+
+			<require_not_sitting/>	
+			<require_gameobject input="enemy"
+							tag="hostile_agent"
+							range="10"
+							closest="1"
+							must_lock="0"
+							failure_reason="Attacking requires a target enemy."
+							do_not_fill_dependency="1" />
+			
+			<utility>
+				<base_job_utility weight="-1"/>
+			</utility>
+			<fsm>
+				<attack_melee input="enemy" name="run"/>
+			</fsm>
+		</job>
+
+		<job name="Respond To Alarm" display_name="Responding To Alarm"
+			icon_skin="ui\orderIcons.xml" icon="march_image"
+			mandatory_eval="0" can_interrupt="1"
+			interruptee_type="4" interrupter_type="3"
+			can_be_social="0"
+			filter="military" >
+
+			<require_gameobject input="alarm"
+							must_lock="0"
+							range="50"
+							tag="alarm_waypoint"
+							failure_reason="Requires an alarm."
+							closest="1"/>
+
+			<require_not_sitting/>
+			<utility>
+				<base_job_utility weight="-1"/>
+			</utility>
+			<fsm>
+				<!--<set_tag name="alarm_waypoint_active" />-->
+				<walk_to_adjacent_position input="alarm" name="run"/>
+				<!-- go home after if you saw nothing -->
+				<!--<military_inspire />-->
+			</fsm>
+			<history importance="10" />
+		</job>
+
+		<job name="Return To Civilization (Military)" display_name="Return To Civilization"
+			icon_skin="ui\orderIcons.xml" icon="cycle_image"
+			mandatory_eval="1"
+			interruptee_type="1" interrupter_type="0"
+			can_be_social="0"
+			is_social="1">
+
+			<require_not_at_civilization/>
+			<require_civ_dist_geq input="200"/>
+			<require_closest_civilization_location input="destination"/>
+			<require_not_sitting/>
+
+			<utility>
+				<base_job_utility weight="5" />
+				<character_personal_stat name="hunger" weight="1"/>
+				<session_bool value="1" name="isNight" weight="20" />
+			</utility>
+			<fsm>
+				<walk_to input="destination" name="run"/>
+			</fsm>
+		</job>
+		
+		<job name="Hassle Fishperson (all)"
+			display_name="Hassle Fishperson"
+			mandatory_eval="1"
+			can_interrupt="1"
+			interruptee_type="3" interrupter_type="2"
+			can_be_social="0"
+			filter="military" >
+			
+			<require_civ_dist_leq input="1"/>
+			<require_character_has_no_tag tag="cultist_fishperson" />
+			<require_session_bool name="fishpeopleHassleAll" value="1" />
+			<require_session_bool name="fishpeoplePolicyHostile" value="0" />
+			
+			<require_gameobject input="fishperson"
+							tag="fishperson"
+							not_tag="fleeing,dead,corpse,food,exit_map"
+							range="8"
+							must_lock="1"
+							closest="1"
+							do_not_fill_dependency="1"/>
+			
+			<utility min="0" max="1599">
+				<base_job_utility weight="500" />
+				<distance_from input="fishperson" weight="-1" />
+			</utility>
+			<fsm>
+				<walk_to_near_position input="fishperson" name="run" />
+				<intimidate_fishperson input="fishperson" />
+			</fsm>
+			<history importance="10" />	
+		</job>
+		
+		<job name="Hassle Fishperson (troublemaker)"
+			display_name="Hassle Aggressive Fishperson"
+			mandatory_eval="1"
+			can_interrupt="1"
+			interruptee_type="3" interrupter_type="2"
+			can_be_social="0"
+			filter="military" >
+			
+			<require_civ_dist_leq input="1"/>
+			<require_character_has_no_tag tag="cultist_fishperson" />
+			<require_session_bool name="fishpeopleHassleTroublemakers" value="1" />
+			<require_session_bool name="fishpeoplePolicyHostile" value="0" />
+			<require_gameobject input="fishperson"
+							tag="bad_fishperson"
+							not_tag="fleeing,dead,corpse,food,exit_map"
+							range="16"
+							must_lock="1"
+							closest="1"
+							do_not_fill_dependency="1"/>
+			
+			<utility min="0" max="1599">
+				<base_job_utility weight="750" />
+				<distance_from input="fishperson" weight="-1" />
+			</utility>
+			<fsm>
+				<walk_to_near_position input="fishperson" name="run" />
+				<intimidate_fishperson input="fishperson" />
+			</fsm>
+			<history importance="10" />	
+		</job>
+		
+		<!--
+		<job name="Shoot At Something In Terror"
+			display_name="Shoot At Something In Terror"
+			can_interrupt="0"
+			mandatory_eval="1"
+			interruptee_type="2" interrupter_type="1"
+			icon_skin="ui\orderIcons.xml" icon="guns_image"
+			can_be_social="0"
+			is_social="1">
+			
+			<require_character_personal_stat_geq name="despair" amount="75"
+										  failure_reason="Requires despair."/>
+			<require_not_sitting/>
+			<require_gameobject input="enemy"
+							range="7"
+							not_tag="citizen"
+							must_lock="0"
+							failure_reason="Attacking requires a target."
+							closest="1"
+							do_not_fill_dependency="1"/>
+			
+			<utility min="0" max="30">
+				<base_job_utility weight="0"/>
+				<feeling name="fear" weight="1"/>
+			</utility>
+			<fsm>
+				<attack_ranged input="enemy" name="run"/>
+			</fsm>
+		</job>
+		
+		<job name="Shoot At Corpse In Terror"
+			display_name="Shoot At Corpse In Terror"
+			can_interrupt="1" mandatory_eval="1"
+			interruptee_type="2" interrupter_type="1"
+			icon_skin="ui\orderIcons.xml" icon="guns_image"
+			can_be_social="0"
+			is_social="1">
+			
+			<require_character_personal_stat_geq name="despair" amount="75"
+										  failure_reason="Requires despair."/>
+
+			<require_not_sitting/>
+			<require_gameobject input="enemy"
+							range="7"
+							tag="corpse"
+							not_tag="animal"
+							must_lock="0"
+							failure_reason="Attacking requires a target."
+							do_not_fill_dependency="1"
+							closest="1" />
+			
+			<utility min="0" max="30">
+				<base_job_utility weight="0"/>
+				<feeling name="fear" weight="1"/>
+			</utility>
+			<fsm>
+				<set_tag name="shooting_corpse" />
+				<attack_ranged input="enemy" name="run"/>
+				<remove_tag name="shooting_corpse" />
+			</fsm>
+		</job>
+		 -->
+		<job name="Remove Corpse Tag Safety Job" display_name="Calm Down"
+				can_interrupt="1" mandatory_eval="1"
+				interruptee_type="1" interrupter_type="0"
+				icon_skin="ui\orderIcons.xml" icon="guns_image"
+				can_be_social="0"
+				is_social="1" >
+			
+			<require_character_personal_stat_geq name="despair" amount="80"
+										  failure_reason="Requires despair."/>
+			<require_no_item_instant />
+			<require_character_has_tag tag="shooting_corpse"/>
+			<require_not_sitting/>
+			<utility min="0" max="3000">
+				<base_job_utility weight="2000"/>
+			</utility>
+			<fsm>
+				<remove_tag name="shooting_corpse" />
+			</fsm>
+		</job>
+<!--
+		<job name="Destroy Cultist Shrine"
+			display_name="Destroy Cultist Shrine"
+			mandatory_eval="0"
+			interruptee_type="3"
+			interrupter_type="2"
+			icon_skin="ui\thoughtIcons.xml" icon="cultist_no">
+			
+			<require_not_sitting/>
+			<require_character_has_no_tag tag="cultist" failure_reason="Requires NOT being a cultist.">
+				<failure_alert icon_file="ui\thoughtIcons.xml"
+							icon="cultist_shrine"
+					heading="Cultist Soldier refuses to destroy Cult Shrine"
+					description="Cultist soldiers will not destroy cult shrines."
+					snooze="60000" />
+			</require_character_has_no_tag>
+
+			<utility min="0" max="30">
+				<base_job_utility weight="1000"/>
+			</utility>
+			<fsm>
+				<walk_to_module input="shrine" name="run"/>	
+				<attack_object_until_destroyed input="shrine" />
+			</fsm>
+		</job> -->
+
+	</military>
+
+<barracks_jobs>
+		<!--
+			mandatory evals:
+			* NCO order training (NCO only)
+			* wander to barracks (social)
+			* patrol near barracks (social)
+			
+			non-mandatory eval training jobs:
+			* do pushups
+			* get yelled at
+			* practice melee attack
+			* stand at attention
+		-->
+		
+		<job name="Order Soldier Around"
+			display_name="Conduct Military Training"
+			icon="barracks"
+			icon_skin="ui\orderIcons.xml"
+			mandatory_eval="1"
+			can_be_social="0"
+			interruptee_type="1"
+			interrupter_type="0"
+			is_social="0"
+			filter="military">
+			
+			<require_not_sitting/>
+			<require_gameobject range="16" input="friend" tag="barracks_jobs,conversable" not_tag="corpse,middle_class"/>
+			<require_gameobject_can_be_sociable input="friend"/>
+			<require_character_on_shift/>
+			<!--<require_character_has_no_tag tag="militia"/>-->
+			<require_character_has_tag tag="military"/>
+			<require_character_has_tag tag="middle_class"/>
+			<require_common_owner no_owner_automatic="0"/>
+			
+			<utility min="0" max="250">
+				<base_job_utility weight="250"/>
+			</utility>
+			<fsm>
+				<weak_follow input="friend" name="run"/>
+				<give_military_training input="friend" />
+				<increment_character_skill name="militarySkill"/>
+			</fsm>
+		</job>
+		
+		<job name="Get Swole" display_name="Do Military Training"
+			mandatory_eval="0"
+			interruptee_type="2" interrupter_type="1"
+			icon_skin="ui\orderIcons.xml" icon="barracks"
+			is_social="0" filter="military">
+			
+			<require_character_on_shift/>
+			<require_character_has_no_tag tag="middle_class"/>
+			<require_not_sitting/>
+			<!--<require_empty_hands/>-->
+			
+			<utility min="0" max="100">
+				<base_job_utility weight="100"/>
+			</utility>
+			<fsm>
+				<force_wander_immediate />
+				<get_swole />
+			</fsm>
+		</job>
+		
+		<job name="Get Swole (spontaneous)" display_name="Do Military Training"
+			mandatory_eval="1"
+			interruptee_type="2" interrupter_type="1"
+			icon_skin="ui\orderIcons.xml" icon="barracks"
+			is_social="1" filter="military">
+			
+			<require_character_on_shift/>
+			<require_character_has_no_tag tag="middle_class"/>
+			<require_not_sitting/>
+			
+			<utility min="0" max="100">
+				<base_job_utility weight="25"/>
+			</utility>
+			<fsm>
+				<force_wander_immediate />
+				<get_swole />
+			</fsm>
+		</job>
+		
+	<job name="Patrol Near NCO" display_name="Wander Near NCO"
+		mandatory_eval="1"
+		icon_skin="ui\orderIcons.xml" icon="cycle_image"
+		interruptee_type="1" interrupter_type="0"
+		is_social="1" filter="military">
+		
+		<require_character_on_shift/>
+		<require_character_has_no_tag tag="middle_class" /> 
+		<require_not_sitting/>
+		<require_not_attending_party/>
+		
+		<utility min="0" max="50">
+			<base_job_utility weight="50"/>
+		</utility>
+		<fsm>
+			<walk_to_near_my_overseer />
+		</fsm>
+	</job>
+	
+	<job name="Run To Rally Waypoint"
+		display_name="Run to Rally"
+		mandatory_eval="1"
+		icon_skin="ui\orderIcons.xml" icon="cycle_image"
+		interruptee_type="2"
+		interrupter_type="1"
+		filter="military">
+		
+		<require_gameobject input="target"
+						tag="rally_waypoint"
+						range="200"
+						must_lock="0"
+						closest="1"
+						do_not_fill_dependency="1"/>
+		
+		<require_not_sitting/>
+		<require_character_on_shift/>
+		<utility >
+			<base_job_utility weight="1000"/>
+		</utility>
+		<fsm>
+			<walk_to input="target" name="run" />
+		</fsm>
+	</job>
+	
+	<job name="Peform Interrogation (event)"
+			display_name="Peform Interrogation"
+			mandatory_eval="1"
+			icon_skin="ui\\orderIcons.xml"
+			icon="standing_desk_icon"
+			interruptee_type="3"
+			interrupter_type="2"
+			can_be_social="0"
+			is_social="1"
+			filter="workshop">
+		
+		<require_work_building input="building"
+						   tag="eventlocked"
+						   must_lock="0"
+						   failure_reason="Requires work building." />
+		
+		<require_character_has_no_tag tag="cultist" />
+		
+		<require_gameobject input="target"
+						tag="citizen"
+						not_tag="fleeing,dead"
+						range="16"
+						must_lock="1"
+						closest="0"
+						do_not_fill_dependency="1"/>
+			
+		<require_not_sitting/>
+		<require_empty_hands/>
+		<require_character_on_shift/>
+
+		<utility min="0" max="150">
+			<base_job_utility weight="250"/>
+		</utility>
+		<fsm>
+			<weak_follow input="target" name="run" />
+			<military_interrogation_event input="target" />
+		</fsm>
+	</job>
+	
+	</barracks_jobs>
+</jobsDB>
